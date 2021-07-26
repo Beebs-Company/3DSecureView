@@ -21,6 +21,7 @@ public protocol ThreeDSecureViewDelegate: class {
 }
 
 public class ThreeDSecureView: UIView {
+    var termUrl = URL(string: "https://beebs.app")
 
     /// The webView that loads the 3DSecure URL
     private var webView: WKWebView!
@@ -61,8 +62,10 @@ public class ThreeDSecureView: UIView {
         charSet.remove("+")
         charSet.remove("&")
 
+        self.termUrl = config.termUrl
+        
         guard let mdEncoded = config.md.addingPercentEncoding(withAllowedCharacters: charSet),
-            let urlEncoded = "https://www.google.com".addingPercentEncoding(withAllowedCharacters: charSet),
+              let urlEncoded = termUrl?.absoluteString.addingPercentEncoding(withAllowedCharacters: charSet),
             let paReqEncoded = config.paReq.addingPercentEncoding(withAllowedCharacters: charSet) else {
                 return
         }
@@ -81,7 +84,7 @@ extension ThreeDSecureView: WKNavigationDelegate {
 
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                         decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        if let host = webView.url?.host, host == "www.google.com" {
+        if let host = webView.url?.host?.replacingOccurrences(of: "www.", with: ""), host == termUrl?.host {
             let javaScript = "function getHTML() { return document.getElementsByTagName('html')[0].innerHTML; } getHTML();"
             webView.evaluateJavaScript(javaScript) { (result, error) in
                 if let error = error {
@@ -103,7 +106,7 @@ extension ThreeDSecureView: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         // Ignore errors relating to us cancelling the request to the callback URL
         if let errorUrl = (error as NSError).userInfo["NSErrorFailingURLKey"] as? URL,
-            errorUrl.host == "www.google.com" {
+           errorUrl.host == termUrl?.host {
             return
         }
         delegate?.threeDSecure(view: self, error: error)

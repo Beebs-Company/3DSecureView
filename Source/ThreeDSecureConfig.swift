@@ -18,10 +18,12 @@ public struct ThreeDSecureConfig {
     let md: String
     let paReq: String
     let cardUrl: URL
+    let termUrl: URL?
 
-    public init(md: String, paReq: String, cardUrl: URL) {
+    public init(md: String, paReq: String, cardUrl: URL, termUrl: URL?) {
         self.md = md
         self.paReq = paReq
         self.cardUrl = cardUrl
+        self.termUrl = termUrl
     }
 }

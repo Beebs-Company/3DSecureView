@@ -70,10 +70,19 @@ public class ThreeDSecureView: UIView {
                 return
         }
 
-        var request = URLRequest(url: config.cardUrl)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.httpBody = "MD=\(mdEncoded)&TermUrl=\(urlEncoded)&PaReq=\(paReqEncoded)".data(using: .utf8)
+        // Construct URL with query parameters for GET request
+        var urlComponents = URLComponents(url: config.cardUrl, resolvingAgainstBaseURL: true)
+        let queryItems = [
+            URLQueryItem(name: "MD", value: mdEncoded),
+            URLQueryItem(name: "TermUrl", value: urlEncoded),
+            URLQueryItem(name: "PaReq", value: paReqEncoded)
+        ]
+        urlComponents?.queryItems = queryItems
+        
+        guard let url = urlComponents?.url else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
         webView.load(request)
     }
 

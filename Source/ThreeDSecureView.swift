@@ -72,11 +72,13 @@ public class ThreeDSecureView: UIView {
 
         // Construct URL with query parameters for GET request
         var urlComponents = URLComponents(url: config.cardUrl, resolvingAgainstBaseURL: true)
-        let queryItems = [
-            URLQueryItem(name: "MD", value: mdEncoded),
-            URLQueryItem(name: "TermUrl", value: urlEncoded),
-            URLQueryItem(name: "PaReq", value: paReqEncoded)
-        ]
+        var queryItems = urlComponents?.queryItems ?? []
+        
+        // Add our required parameters
+        queryItems.append(URLQueryItem(name: "MD", value: mdEncoded))
+        queryItems.append(URLQueryItem(name: "TermUrl", value: urlEncoded))
+        queryItems.append(URLQueryItem(name: "PaReq", value: paReqEncoded))
+        
         urlComponents?.queryItems = queryItems
         
         guard let url = urlComponents?.url else { return }
